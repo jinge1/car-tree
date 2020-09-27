@@ -1,18 +1,26 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    {{showList}}
+    <Tree :list="list" :showList.sync="showList" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Tree from './components/Tree.vue'
+import { madeTree } from './utils/utils'
+console.log(madeTree())
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
+    Tree,
+  },
+  data() {
+    return {
+      list: madeTree(),
+      showList: []
+    }
+  },
 }
 </script>
 
