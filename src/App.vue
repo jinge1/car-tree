@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    {{showList}}
-    <Tree :list="list" :showList.sync="showList" />
+    {{checkedList}}
+    <Tree :list="list" :showList.sync="showList" :checkedList.sync="checkedList" />
   </div>
 </template>
 
@@ -17,8 +17,9 @@ export default {
   },
   data() {
     return {
-      list: madeTree(),
-      showList: []
+      list: Object.freeze(madeTree()),
+      showList: [],
+      checkedList: []
     }
   },
 }

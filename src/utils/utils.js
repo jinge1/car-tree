@@ -20,10 +20,10 @@ export function madeTree(maxDeep = 3, currentDeep = 0, parentIds = []) {
     const id = n < 10 ? `0${n}` : `${n}`
     const childrenInfo =
       currentDeep < maxDeep
-        ? { children: madeTree(maxDeep, currentDeep + 1, [...parentIds, id])}
+        ? { children: madeTree(maxDeep, currentDeep + 1, [...parentIds, `${parentIds.join('')}${id}`])}
         : {}
     return {
-      title: `title-${id}-${parentIds.join('')}`,
+      title: `title-${parentIds.join('')}${id}`,
       id: `${parentIds.join('')}${id}`,
       parentIds,
       ...childrenInfo,
