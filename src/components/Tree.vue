@@ -14,7 +14,9 @@
             item.children.filter((f) => checkedList.includes(f.id)) ===
             item.children.length
               ? 'passed'
-              : (item.children.some(s=> !checkedList.includes(s.id)) ? 'stop-circle-o' : 'circle')
+              : item.children.some((s) => !checkedList.includes(s.id))
+              ? 'stop-circle-o'
+              : 'circle'
           "
         />
         <van-icon
@@ -53,14 +55,14 @@ export default {
     },
   },
   methods: {
-    getIconName(item) {
-      const { showList, checkedList } = this
-      const { children, id } = item
-      if (!Array.isArray(children)) {
-        return ''
-      }
-      return ''
-    },
+    // getIconName(item) {
+    //   const { showList, checkedList } = this
+    //   const { children, id } = item
+    //   if (!Array.isArray(children)) {
+    //     return ''
+    //   }
+    //   return ''
+    // },
     changeShowList(item) {
       const { showList } = this
       this.$emit(
@@ -72,29 +74,20 @@ export default {
     },
     changeCheckedList(item) {
       const { checkedList } = this
-      // const { children, id } = item
+      const { id } = item
       const childIds = this.getChildIds(item)
-      console.log(childIds)
-      if (checkedList.includes(item.id)) {
-        this.$emit(
-          'update:checkedList',
-          checkedList.filter((c) => childIds.includes(c))
-        )
-        console.log('do parent')
-      } else {
-        this.$emit('update:checkedList', checkedList.concat(childIds))
-        console.log('do parent')
-      }
-      // 取消选择
-      // if (checkedList.includes(id)) {
-      //   result.push(id)
-      //   if (Array.isArray(children)) {
-      //     children.forEach(child=> {
-      //       result = result.filter(r=> r !== child.id)
-      //     })
-      //   }
-      // }
+      let result = checkedList.includes(item.id)
+        ? checkedList.filter((c) => childIds.includes(c))
+        : [...new Set([...checkedList, ...childIds])]
+      // this.$emit('update:checkedList', this.getCheckedList(result, item))
+      this.$emit('refresh', result, item)
     },
+    // getCheckedList(result, item) {
+    //   // const {list} = this
+    //   this.$emit('refresh', result, item)
+    //   // console.log(item, list)
+    //   // const top = parentIds
+    // },
     // 获取某个节点下的所有子节点列表
     getChildIds(item) {
       const { children, id } = item

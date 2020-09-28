@@ -1,7 +1,12 @@
 <template>
   <div id="app">
-    {{checkedList}}
-    <Tree :list="list" :showList.sync="showList" :checkedList.sync="checkedList" />
+    <Tree
+      :list="list"
+      :showList.sync="showList"
+      :checkedList.sync="checkedList"
+      @refresh="refresh"
+    />
+    {{ checkedList }}
   </div>
 </template>
 
@@ -19,8 +24,26 @@ export default {
     return {
       list: Object.freeze(madeTree()),
       showList: [],
-      checkedList: []
+      checkedList: [],
     }
+  },
+  methods: {
+    refresh(result, item, index = 0) {
+      const { list } = this
+      const { parentIds, id } = item
+      const top =
+        Array.isArray(parentIds) && parentIds.length > 0
+          ? list.find((l) => l.id === parentIds[0])
+          : item
+      // console.log(top)
+      const { id: topId, children: topChildren } = top
+      if (Array.isArray(topChildren) && topChildren.length > 0) {
+        console.log('0')
+      } else {
+        // this.checkedList = result
+      }
+      this.checkedList = result
+    },
   },
 }
 </script>
