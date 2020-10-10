@@ -1,14 +1,29 @@
 <template>
   <div id="app">
-    {{showList}}
-    <Tree :list="list" :showList.sync="showList" />
+    <Tree
+      :list="list"
+      :showList.sync="showList"
+      :checkedList="checkedList"
+      :partCheckedList="partCheckedList"
+      @select="select"
+    />
+    {{ partCheckedList }}
   </div>
 </template>
 
 <script>
 import Tree from './components/Tree.vue'
-import { madeTree } from './utils/utils'
-console.log(madeTree())
+import { getTree, getChildIds, getSelectTree } from './utils/utils'
+import treeData from './mock/tree'
+import carsData from './mock/cars'
+
+// console.timeEnd('tree')
+
+// console.log(getTree(treeData.data, carsData.data))
+
+const list = Object.freeze(getTree(treeData.data, carsData.data))
+
+console.log(list)
 
 export default {
   name: 'App',
@@ -17,9 +32,26 @@ export default {
   },
   data() {
     return {
-      list: madeTree(),
-      showList: []
+      list,
+      showList: [],
+      checkedList: [],
+      partCheckedList: [], // 部分选中
     }
+  },
+  methods: {
+    select(result, item) {
+      const { list, partCheckedList } = this
+      const { parentIds } = item
+
+      const [res, part] = getSelectTree(
+        list,
+        result,
+        parentIds,
+        partCheckedList
+      )
+      this.checkedList = res
+      this.partCheckedList = part
+    },
   },
 }
 </script>
