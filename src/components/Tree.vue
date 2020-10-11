@@ -47,13 +47,14 @@
         :checkedList="checkedList"
         :partCheckedList="partCheckedList"
         :isShowMore="isShowMore"
+        :limit="limit"
         v-on="$listeners"
       ></Tree>
     </li>
   </ul>
 </template>
 <script>
-import { getChildIds } from '../utils/utils'
+import { getChildIds, getCarIds } from '../utils/utils'
 export default {
   name: 'Tree',
   props: {
@@ -69,13 +70,19 @@ export default {
       type: Array,
       default: () => [],
     },
-    partCheckedList: {
-      type: Array,
-      default: () => [],
-    },
+    // 是否支持同时展开多个
     isShowMore: {
       type: Boolean,
       default: false,
+    },
+    // 最多支持选中个数
+    limit: {
+      type: Number,
+      default: 0,
+    },
+    partCheckedList: {
+      type: Array,
+      default: () => [],
     },
   },
   methods: {
@@ -85,8 +92,9 @@ export default {
     changeCheckedList(item) {
       const { checkedList } = this
       const { id, parentId, nodeType, children } = item
-      const childIds = getChildIds(item)
-      let result = checkedList.includes(id)
+      const isCancel = checkedList.includes(id)
+      const childIds = getCarIds(item)
+      const result = isCancel
         ? checkedList.filter((c) => !childIds.includes(c))
         : [...new Set([...checkedList, ...childIds])]
       this.$emit('select', result, item)
@@ -118,6 +126,7 @@ export default {
 <style scoped lang="less">
 .tree {
   text-align: left;
+  user-select: none;
   & > li {
     margin-left: 18px;
   }

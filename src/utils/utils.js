@@ -31,20 +31,22 @@ function changeNodeInfo(item, keys, other = {}) {
 
 /**
  * 转换数组为组织树
- * @param {Array} tree 组织树源一位数组
+ * @param {Array} tree 组织树源一维数组
  * @param {Array} cars 车辆信息列表
  * @param {string} parentId 父节点id
  * @param {Array} parentIds 父节点数组信息
  */
 export function getTree(tree, cars = [], parentId = '-11', parentIds = []) {
   return tree
-    .filter((f) => f.p === parentId)
-    .map((item) => {
-      const nodeInfo = changeNodeInfo(item, treeKeys, {
+    .filter((t) => t.p === parentId)
+    .map((t) => {
+      // 节点信息转换
+      const nodeInfo = changeNodeInfo(t, treeKeys, {
         parentIds,
         nodeType: 'tree',
       })
-      const arr = cars
+      // 节点下车辆信息(节点下既可以有车辆，也可以有子节点)
+      const nodeCars = cars
         .filter((c) => c.r === nodeInfo.id)
         .map((c) =>
           changeNodeInfo(c, carKeys, {
@@ -52,15 +54,42 @@ export function getTree(tree, cars = [], parentId = '-11', parentIds = []) {
             nodeType: 'car',
           })
         )
+      // 节点孩子节点信息(节点下既可以有车辆，也可以有子节点)
       const children =
-        item.d === null
-          ? arr
+        t.d === null
+          ? nodeCars
           : [
-              ...getTree(tree, cars, nodeInfo.id, [...parentIds, nodeInfo.id]),
-              ...arr,
+              ...getTree(
+                tree.filter((f) => f.p !== parentId),
+                cars.filter((c) => c.r !== nodeInfo.id),
+                nodeInfo.id,
+                [...parentIds, nodeInfo.id]
+              ),
+              ...nodeCars,
             ]
-      return { ...nodeInfo, children }
+
+      return children.length > 0 ? { ...nodeInfo, children } : nodeInfo
     })
+}
+
+/**
+ * 找出某个结点下的所有子结点
+ */
+export function getCarIds(item, limit) {
+  const { children, id, nodeType } = item
+  const isLimit = typeof limit === 'number'
+  let result = nodeType === 'car' ? [id] : []
+  if (Array.isArray(children)) {
+    for (let child of children) {
+      if (isLimit && result.length >= limit) {
+        break
+      }
+      result = isLimit
+        ? [...result, ...getCarIds(child, limit - result.length)]
+        : [...result, ...getCarIds(child)]
+    }
+  }
+  return isLimit ? result.slice(0, limit) : result
 }
 
 /**
