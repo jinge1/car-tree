@@ -35,7 +35,6 @@ export default {
       list,
       showList: [],
       checkedList: [],
-      checkedNode: [],
       partCheckedList: [], // 部分选中
     }
   },
@@ -54,8 +53,11 @@ export default {
     },
   },
   computed: {
-
-  }
+    checkedNode() {
+      const { list, checkedList } = this
+      return []
+    },
+  },
 }
 </script>
 
