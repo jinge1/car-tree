@@ -4,6 +4,7 @@
       :list="list"
       :showList.sync="showList"
       :checkedList="checkedList"
+      :checkedNodeList="checkedNodeList"
       :partCheckedList="partCheckedList"
       @select="select"
     />
@@ -13,17 +14,9 @@
 
 <script>
 import Tree from './components/Tree.vue'
-import { getTree, getChildIds, getSelectTree } from './utils/utils'
+import { getTree, getNodeList } from './utils/utils'
 import treeData from './mock/tree'
 import carsData from './mock/cars'
-
-// console.timeEnd('tree')
-
-// console.log(getTree(treeData.data, carsData.data))
-
-const list = Object.freeze(getTree(treeData.data, carsData.data))
-
-console.log(list)
 
 export default {
   name: 'App',
@@ -32,32 +25,39 @@ export default {
   },
   data() {
     return {
-      list,
+      list: Object.freeze(getTree(treeData.data, carsData.data)),
       showList: [],
       checkedList: [],
+      checkedNodeList: [],
       partCheckedList: [], // 部分选中
     }
   },
   methods: {
     select(result, item) {
-      const { list, partCheckedList } = this
-      const { parentIds } = item
-      const [res, part] = getSelectTree(
-        list,
-        result,
-        parentIds,
-        partCheckedList
-      )
-      this.checkedList = res
-      this.partCheckedList = part
+      const { list } = this
+      // const { parentIds } = item
+      // const [res, part] = getSelectTree(
+      //   list,
+      //   result,
+      //   parentIds,
+      //   partCheckedList
+      // )
+      // add or del ?
+      this.checkedList = result
+      this.updateNode(item)
+      // this.partCheckedList = part
     },
-  },
-  computed: {
-    checkedNode() {
+    updateNode(item) {
       const { list, checkedList } = this
-      return []
+      const {parentIds} = item
+      const { partCheckedList, checkedNodeList } = getNodeList(
+        parentIds.length === 0 ? item : list.find((l)=> l.id === parentIds[0]),
+        checkedList
+      )
+      this.partCheckedList = partCheckedList
+      this.checkedList = checkedNodeList
     },
-  },
+  }
 }
 </script>
 

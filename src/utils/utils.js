@@ -73,23 +73,39 @@ export function getTree(tree, cars = [], parentId = '-11', parentIds = []) {
 }
 
 /**
- * 找出某个结点下的所有子结点
+ * 返回某个节点下所有car节点id数组
+ * @param {object} item 节点信息
+ * @param {number|undefined} num 限制选择个数
  */
-export function getCarIds(item, limit) {
+export function getCarIds(item, num) {
   const { children, id, nodeType } = item
-  const isLimit = typeof limit === 'number'
+  const isLimit = typeof num === 'number'
   let result = nodeType === 'car' ? [id] : []
   if (Array.isArray(children)) {
     for (let child of children) {
-      if (isLimit && result.length >= limit) {
+      // 若已达到上限，则停止添加
+      if (isLimit && result.length >= num) {
         break
       }
       result = isLimit
-        ? [...result, ...getCarIds(child, limit - result.length)]
+        ? [...result, ...getCarIds(child, num - result.length)]
         : [...result, ...getCarIds(child)]
     }
   }
-  return isLimit ? result.slice(0, limit) : result
+  return isLimit ? result.slice(0, num) : result
+}
+
+export function getNodeList(node, checkedList, result = {}) {
+  const { children } = node
+  const { partCheckedList = [], checkedNodeList = [] } = result
+  let arr = []
+  // if (children.every((child) => !Array.isArray(child.children)) || ) {
+  //   arr = [...arr, []]
+  // }
+  return {
+    partCheckedList,
+    checkedNodeList,
+  }
 }
 
 /**

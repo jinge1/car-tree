@@ -93,7 +93,8 @@ export default {
       const { checkedList } = this
       const { id, parentId, nodeType, children } = item
       const isCancel = checkedList.includes(id)
-      const childIds = getCarIds(item)
+      const childIds = getCarIds(item, 5)
+      // const childIds = getCarIds(item)
       const result = isCancel
         ? checkedList.filter((c) => !childIds.includes(c))
         : [...new Set([...checkedList, ...childIds])]
