@@ -95,41 +95,49 @@ export function getCarIds(item, num) {
   return isLimit ? result.slice(0, num) : result
 }
 
-export function getNodeList(node, checkedList, result = {}) {
-  // const { children } = node
-  const { partCheckedList = [], checkedNodeList = [] } = result
-  // let arr = children.map(({ id }) => id)
-  // children.forEach(child=> {
-  //   if(Array.isArray(child.children)){
-
-  //   }
-  // })
-  // if (children.every((child) => !Array.isArray(child.children))) {
-  //   arr = [...arr, [children.map(({ id }) => id)]]
-  // } else {
-  //   console.log(2)
-  // }
-  // console.log(node, arr)
-  const arr = getNodeArray(node)
-  console.log(arr)
+export function getNodeList(node, checkedList) {
+  let partCheckedList = []
+  let checkedNodeList = []
+  let doneList = [...partCheckedList, ...checkedNodeList, ...checkedList]
+  const nodeQueue = getNodeQueue(node)
+  while (nodeQueue.length > 0) {
+    nodeQueue[0].forEach((q) => {
+      const { children } = q
+      const checked = children.find(
+        (c) =>
+          (Array.isArray(c.children) && checkedNodeList.includes(c.id)) ||
+          (!Array.isArray(c.children) && checkedList.includes(c.id))
+      )
+      const num = typeof checked === 'undefined' ? 0 : checked.length
+      if (num === children.length) {
+        checkedNodeList.filter((l) => l.id !== q.id).push(q.id)
+      }
+      if (num > 0 && num < children.length) {
+        partCheckedList.filter((l) => l.id !== q.id).push(q.id)
+      }
+    })
+    nodeQueue.shift()
+  }
   return {
     partCheckedList,
     checkedNodeList,
   }
 }
 
-export function getNodeArray(node) {
+/**
+ * 获取某个节点下的所有节点队列，叶子节点在前
+ * @param {object} node
+ */
+export function getNodeQueue(node) {
   const { children } = node
-  // let arr = [children.map(({ id }) => id)]
-  let arr = [children.map(({ title }) => title)]
-  children.forEach((child) => {
-    if (Array.isArray(child.children)) {
-      // console.log(getNodeArray(child))
-      arr.push(getNodeArray(child))
-      // arr = [arr, ...getNodeArray(child)]
-    }
+  let arr = []
+  const nodeChildren = children.filter((c) => Array.isArray(c.children))
+  nodeChildren.forEach((child) => {
+    arr = [...arr, ...getNodeQueue(child)]
   })
-  // console.log(arr)
+  if (nodeChildren.length > 0) {
+    arr = [...arr, nodeChildren]
+  }
   return arr
 }
 
