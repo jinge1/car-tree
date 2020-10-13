@@ -73,7 +73,7 @@ export default {
     // 是否支持同时展开多个
     isShowMore: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // 最多支持选中个数
     limit: {

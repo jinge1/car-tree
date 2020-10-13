@@ -49,15 +49,15 @@ export default {
     },
     updateNode(item) {
       const { list, checkedList } = this
-      const {parentIds} = item
+      const { parentIds } = item
       const { partCheckedList, checkedNodeList } = getNodeList(
-        parentIds.length === 0 ? item : list.find((l)=> l.id === parentIds[0]),
+        parentIds.length === 0 ? item : list.find((l) => l.id === parentIds[0]),
         checkedList
       )
       this.partCheckedList = partCheckedList
-      this.checkedList = checkedNodeList
+      // this.checkedList = checkedNodeList
     },
-  }
+  },
 }
 </script>
 

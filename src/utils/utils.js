@@ -96,16 +96,41 @@ export function getCarIds(item, num) {
 }
 
 export function getNodeList(node, checkedList, result = {}) {
-  const { children } = node
+  // const { children } = node
   const { partCheckedList = [], checkedNodeList = [] } = result
-  let arr = []
-  // if (children.every((child) => !Array.isArray(child.children)) || ) {
-  //   arr = [...arr, []]
+  // let arr = children.map(({ id }) => id)
+  // children.forEach(child=> {
+  //   if(Array.isArray(child.children)){
+
+  //   }
+  // })
+  // if (children.every((child) => !Array.isArray(child.children))) {
+  //   arr = [...arr, [children.map(({ id }) => id)]]
+  // } else {
+  //   console.log(2)
   // }
+  // console.log(node, arr)
+  const arr = getNodeArray(node)
+  console.log(arr)
   return {
     partCheckedList,
     checkedNodeList,
   }
+}
+
+export function getNodeArray(node) {
+  const { children } = node
+  // let arr = [children.map(({ id }) => id)]
+  let arr = [children.map(({ title }) => title)]
+  children.forEach((child) => {
+    if (Array.isArray(child.children)) {
+      // console.log(getNodeArray(child))
+      arr.push(getNodeArray(child))
+      // arr = [arr, ...getNodeArray(child)]
+    }
+  })
+  // console.log(arr)
+  return arr
 }
 
 /**
