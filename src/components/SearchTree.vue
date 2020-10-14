@@ -1,6 +1,12 @@
 <template>
   <div>
-    {{checkedNodeList}}
+    <p>
+      <van-field
+        v-model="key"
+        @input="changeKey"
+        placeholder="请输入搜索车牌号或点部"
+      />
+    </p>
     <Tree
       :list="list"
       :showList.sync="showList"
@@ -34,13 +40,19 @@ export default {
       showList: [],
       checkedNodeList: [],
       partCheckedNodeList: [], // 部分选中
+      key: '',
     }
   },
   methods: {
     select(result, item) {
       const { list } = this
       this.$emit('update:checkedList', result)
-      this.updateNode(item)
+      this.$nextTick(() => {
+        this.updateNode(item)
+      })
+    },
+    changeKey(v) {
+      console.log(v)
     },
     updateNode(item) {
       const {
