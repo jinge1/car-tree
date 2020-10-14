@@ -110,7 +110,15 @@ export default {
       const { id, parentId, nodeType, children } = item
       // 本次影响到的叶子结点id集合
       const changeIds = getEndIds(item)
-      console.log(item, type, limit)
+      const changeLen = changeIds.length
+      // 是否已经选满
+      const isFull = limit === checkedList.length
+
+      // 从上次已选择的节点中排除本次影响的节点
+      const computedChecked = checkedList.filter((c) => !changeIds.includes(c))
+
+      // 本次改变元素中，最多可选择个数
+      const surplus = limit - computedChecked.length
 
       // 达到上限时提示操作
       const tip = () => console.log(`已选择上限${limit}，无法在选择了！`)
@@ -119,17 +127,15 @@ export default {
 
       // 选择处理
       if (type === 1) {
-        if (limit === checkedList.length) {
+        if (isFull) {
           tip()
           return false
         }
-        // 剩余可添加个数
-        const num = limit - checkedList.length
         // 本次添加超出最大范围，只添加部分
-        if (changeIds.length > num) {
+        if (changeLen > surplus) {
           tip()
         }
-        result = [...checkedList, ...changeIds.slice(0, num)]
+        result = [...checkedList, ...changeIds.slice(0, surplus)]
       }
 
       // 取消选择处理
@@ -140,30 +146,18 @@ export default {
       // 部分选择处理
       if (type === 3) {
         // 已达上限，则提示后，取消选择
-        if (limit === checkedList.length) {
+        if (isFull) {
           tip()
           result = checkedList.filter((c) => !changeIds.includes(c))
         }
-        if (limit < checkedList.length) {
-          // 从已选中结点中排查出本次选中元素
-          const computedChecked = checkedList.filter(
-            (c) => !changeIds.includes(c)
-          )
-          const num = limit - (computedChecked.length + changeIds.length)
+
+        if (limit > checkedList.length) {
           // 选择超过限
-          if (num < 0) {
+          if (changeLen > surplus) {
             tip()
-            result = [
-              ...computedChecked,
-              ...changeIds.slice(0, limit - computedChecked.length),
-            ]
           }
-          if (num >= 0) {
-            result = [...computedChecked, ...changeIds]
-          }
+          result = [...computedChecked, ...changeIds.slice(0, surplus)]
         }
-        console.log(result, '90876')
-        // 全选
       }
       this.$emit('select', result, item)
     },
