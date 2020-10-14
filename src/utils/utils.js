@@ -95,33 +95,49 @@ export function getCarIds(item, num) {
   return isLimit ? result.slice(0, num) : result
 }
 
+/**
+ * 获取指定结点下，结点全选，部分选中状态列表
+ * @param {object} node
+ * @param {Array} checkedList
+ */
 export function getNodeList(node, checkedList) {
-  let partCheckedList = []
+  let partCheckedNodeList = []
   let checkedNodeList = []
-  let doneList = [...partCheckedList, ...checkedNodeList, ...checkedList]
   const nodeQueue = getNodeQueue(node)
+  console.log(nodeQueue)
   while (nodeQueue.length > 0) {
-    nodeQueue[0].forEach((q) => {
+    let checkedIds = [...checkedNodeList, ...checkedList]
+    nodeQueue.shift().forEach((q) => {
       const { children } = q
-      const checked = children.find(
-        (c) =>
-          (Array.isArray(c.children) && checkedNodeList.includes(c.id)) ||
-          (!Array.isArray(c.children) && checkedList.includes(c.id))
-      )
-      const num = typeof checked === 'undefined' ? 0 : checked.length
-      if (num === children.length) {
-        checkedNodeList.filter((l) => l.id !== q.id).push(q.id)
+      const len = children.length
+      const checkedLen = children.filter((c) => checkedIds.includes(c.id))
+        .length
+
+      // 当前结点为全选
+      if (checkedLen === len) {
+        checkedNodeList = unique([...checkedNodeList, q.id])
       }
-      if (num > 0 && num < children.length) {
-        partCheckedList.filter((l) => l.id !== q.id).push(q.id)
+      // 当前结点为部分选择
+      if (
+        children.some((s) => partCheckedNodeList.includes(s.id)) ||
+        (checkedLen > 0 && checkedLen < len)
+      ) {
+        partCheckedNodeList = unique([...partCheckedNodeList, q.id])
       }
     })
-    nodeQueue.shift()
   }
   return {
-    partCheckedList,
+    partCheckedNodeList,
     checkedNodeList,
   }
+}
+
+/**
+ * 数组去重
+ * @param {Array} arr
+ */
+export function unique(arr = []) {
+  return [...new Set(arr)]
 }
 
 /**
@@ -156,41 +172,41 @@ export function getChildIds(item) {
   return result
 }
 
-/**
- * 通过已选择结点，返回自动更新父节点信息的结果
- * @param {Array} list 树列表
- * @param {Array} result 已选择结果
- * @param {Array} parentIds 当前结点父节点列表
- * @param {Array} partCheckedList 部分选中列表
- */
-export function getSelectTree(list, result, parentIds, partCheckedList) {
-  let l = [...list]
-  // 根结点到目标结点所有直接子节点列表
-  const arr = parentIds.map((p) => {
-    const { children = [] } = l.find((f) => f.id === p)
-    l = [...children]
-    return children.map(({ id }) => id)
-  })
-  const r = [...parentIds].reverse()
-  let res = [...result]
-  let part = [...partCheckedList]
-  // 从修改项的父级向根结点判断全选状态
-  arr.reverse().forEach((c, i) => {
-    const p = r[i]
-    res = res.filter((f) => f !== p)
-    part = part.filter((t) => t !== p)
+// /**
+//  * 通过已选择结点，返回自动更新父节点信息的结果
+//  * @param {Array} list 树列表
+//  * @param {Array} result 已选择结果
+//  * @param {Array} parentIds 当前结点父节点列表
+//  * @param {Array} partCheckedNodeList 部分选中列表
+//  */
+// export function getSelectTree(list, result, parentIds, partCheckedNodeList) {
+//   let l = [...list]
+//   // 根结点到目标结点所有直接子节点列表
+//   const arr = parentIds.map((p) => {
+//     const { children = [] } = l.find((f) => f.id === p)
+//     l = [...children]
+//     return children.map(({ id }) => id)
+//   })
+//   const r = [...parentIds].reverse()
+//   let res = [...result]
+//   let part = [...partCheckedNodeList]
+//   // 从修改项的父级向根结点判断全选状态
+//   arr.reverse().forEach((c, i) => {
+//     const p = r[i]
+//     res = res.filter((f) => f !== p)
+//     part = part.filter((t) => t !== p)
 
-    // 孩子结点每项都为选中状态，则添加父级为选中状态
-    if (c.every((s) => res.includes(s))) {
-      res = [...res, p]
-    }
-    // 部分选中逻辑
-    if (
-      (c.some((s) => res.includes(s)) && !c.every((s) => res.includes(s))) ||
-      c.some((s) => part.includes(s))
-    ) {
-      part = [...part, p]
-    }
-  })
-  return [res, part]
-}
+//     // 孩子结点每项都为选中状态，则添加父级为选中状态
+//     if (c.every((s) => res.includes(s))) {
+//       res = [...res, p]
+//     }
+//     // 部分选中逻辑
+//     if (
+//       (c.some((s) => res.includes(s)) && !c.every((s) => res.includes(s))) ||
+//       c.some((s) => part.includes(s))
+//     ) {
+//       part = [...part, p]
+//     }
+//   })
+//   return [res, part]
+// }

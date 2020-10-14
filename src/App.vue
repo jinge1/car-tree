@@ -1,14 +1,14 @@
 <template>
   <div id="app">
+    {{ partCheckedNodeList }}
     <Tree
       :list="list"
       :showList.sync="showList"
       :checkedList="checkedList"
       :checkedNodeList="checkedNodeList"
-      :partCheckedList="partCheckedList"
+      :partCheckedNodeList="partCheckedNodeList"
       @select="select"
     />
-    {{ partCheckedList }}
   </div>
 </template>
 
@@ -29,33 +29,25 @@ export default {
       showList: [],
       checkedList: [],
       checkedNodeList: [],
-      partCheckedList: [], // 部分选中
+      partCheckedNodeList: [], // 部分选中
     }
   },
   methods: {
     select(result, item) {
       const { list } = this
-      // const { parentIds } = item
-      // const [res, part] = getSelectTree(
-      //   list,
-      //   result,
-      //   parentIds,
-      //   partCheckedList
-      // )
-      // add or del ?
       this.checkedList = result
       this.updateNode(item)
-      // this.partCheckedList = part
     },
     updateNode(item) {
       const { list, checkedList } = this
       const { parentIds } = item
-      const { partCheckedList, checkedNodeList } = getNodeList(
+      const { partCheckedNodeList, checkedNodeList } = getNodeList(
         parentIds.length === 0 ? item : list.find((l) => l.id === parentIds[0]),
         checkedList
       )
-      this.partCheckedList = partCheckedList
-      // this.checkedList = checkedNodeList
+      this.partCheckedNodeList = partCheckedNodeList
+      this.checkedNodeList = checkedNodeList
+      console.log(checkedNodeList, 678)
     },
   },
 }

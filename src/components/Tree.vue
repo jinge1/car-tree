@@ -7,17 +7,18 @@
           @click="changeShowList(item)"
           v-if="item.nodeType === 'tree'"
         />
+
         <van-icon
           v-if="item.nodeType === 'car'"
           :name="checkedList.includes(item.id) ? 'passed' : 'circle'"
-          @click="changeCheckedList(item)"
+          @click="changeCheckedList(item, checkedList.includes(item.id))"
         />
+
         <van-icon
           v-if="
             item.nodeType === 'tree' &&
-            (item.parentIds.length > 1 ||
-              item.children.every((child) => !Array.isArray(child.children))) &&
-            partCheckedList.includes(item.id)
+            isShowIcon(item) &&
+            partCheckedNodeList.includes(item.id)
           "
           name="stop-circle-o"
           @click="changeCheckedList(item)"
@@ -25,11 +26,19 @@
         <van-icon
           v-if="
             item.nodeType === 'tree' &&
-            (item.parentIds.length > 1 ||
-              item.children.every((child) => !Array.isArray(child.children))) &&
-            !partCheckedList.includes(item.id)
+            isShowIcon(item) &&
+            checkedNodeList.includes(item.id)
           "
-          :name="checkedList.includes(item.id) ? 'passed' : 'circle'"
+          name="passed"
+          @click="changeCheckedList(item, true)"
+        />
+        <van-icon
+          v-if="
+            item.nodeType === 'tree' &&
+            isShowIcon(item) &&
+            ![...checkedNodeList, ...partCheckedNodeList].includes(item.id)
+          "
+          name="circle"
           @click="changeCheckedList(item)"
         />
 
@@ -45,7 +54,8 @@
         :list="item.children"
         :showList="showList"
         :checkedList="checkedList"
-        :partCheckedList="partCheckedList"
+        :checkedNodeList="checkedNodeList"
+        :partCheckedNodeList="partCheckedNodeList"
         :isShowMore="isShowMore"
         :limit="limit"
         v-on="$listeners"
@@ -54,7 +64,7 @@
   </ul>
 </template>
 <script>
-import { getChildIds, getCarIds } from '../utils/utils'
+import { getChildIds, getCarIds, unique } from '../utils/utils'
 export default {
   name: 'Tree',
   props: {
@@ -80,7 +90,11 @@ export default {
       type: Number,
       default: 0,
     },
-    partCheckedList: {
+    checkedNodeList: {
+      type: Array,
+      default: () => [],
+    },
+    partCheckedNodeList: {
       type: Array,
       default: () => [],
     },
@@ -89,15 +103,14 @@ export default {
     /**
      * 选择与取消选择结点(不包括父节点全选非全选的逻辑)
      */
-    changeCheckedList(item) {
+    changeCheckedList(item, isCancel = false) {
       const { checkedList } = this
       const { id, parentId, nodeType, children } = item
-      const isCancel = checkedList.includes(id)
-      const childIds = getCarIds(item, 5)
+      const childIds = isCancel ? getCarIds(item) : getCarIds(item, 5)
       // const childIds = getCarIds(item)
       const result = isCancel
         ? checkedList.filter((c) => !childIds.includes(c))
-        : [...new Set([...checkedList, ...childIds])]
+        : unique([...checkedList, ...childIds])
       this.$emit('select', result, item)
     },
     /**
@@ -120,6 +133,12 @@ export default {
             : [...item.parentIds, item.id]
         )
       }
+    },
+    isShowIcon(item) {
+      return (
+        item.parentIds.length > 1 ||
+        item.children.every((child) => !Array.isArray(child.children))
+      )
     },
   },
 }
