@@ -5,36 +5,38 @@
         <van-icon
           :name="showList.includes(item.id) ? 'back-top' : 'down'"
           @click="changeShowList(item)"
-          v-if="item.nodeType === 'tree'"
+          v-if="item.nodeType === 'node'"
         />
 
         <van-icon
-          v-if="item.nodeType === 'car'"
+          v-if="item.nodeType === 'end'"
           :name="checkedList.includes(item.id) ? 'passed' : 'circle'"
-          @click="changeCheckedList(item, checkedList.includes(item.id))"
+          @click="
+            changeCheckedList(item, checkedList.includes(item.id) ? 2 : 1)
+          "
         />
 
         <van-icon
           v-if="
-            item.nodeType === 'tree' &&
+            item.nodeType === 'node' &&
             isShowIcon(item) &&
             partCheckedNodeList.includes(item.id)
           "
           name="stop-circle-o"
-          @click="changeCheckedList(item)"
+          @click="changeCheckedList(item, 3)"
         />
         <van-icon
           v-if="
-            item.nodeType === 'tree' &&
+            item.nodeType === 'node' &&
             isShowIcon(item) &&
             checkedNodeList.includes(item.id)
           "
           name="passed"
-          @click="changeCheckedList(item, true)"
+          @click="changeCheckedList(item, 2)"
         />
         <van-icon
           v-if="
-            item.nodeType === 'tree' &&
+            item.nodeType === 'node' &&
             isShowIcon(item) &&
             ![...checkedNodeList, ...partCheckedNodeList].includes(item.id)
           "
@@ -64,7 +66,7 @@
   </ul>
 </template>
 <script>
-import { getChildIds, getCarIds, unique } from '../utils/utils'
+import { getChildIds, getEndIds, unique } from '../utils/utils'
 export default {
   name: 'Tree',
   props: {
@@ -88,7 +90,7 @@ export default {
     // 最多支持选中个数
     limit: {
       type: Number,
-      default: 0,
+      default: 6,
     },
     checkedNodeList: {
       type: Array,
@@ -101,16 +103,68 @@ export default {
   },
   methods: {
     /**
-     * 选择与取消选择结点(不包括父节点全选非全选的逻辑)
+     * type 1 选择，2 取消选择，3 部分选择
      */
-    changeCheckedList(item, isCancel = false) {
-      const { checkedList } = this
+    changeCheckedList(item, type = 1) {
+      const { checkedList, limit } = this
       const { id, parentId, nodeType, children } = item
-      const childIds = isCancel ? getCarIds(item) : getCarIds(item, 5)
-      // const childIds = getCarIds(item)
-      const result = isCancel
-        ? checkedList.filter((c) => !childIds.includes(c))
-        : unique([...checkedList, ...childIds])
+      // 本次影响到的叶子结点id集合
+      const changeIds = getEndIds(item)
+      console.log(item, type, limit)
+
+      // 达到上限时提示操作
+      const tip = () => console.log(`已选择上限${limit}，无法在选择了！`)
+
+      let result = [...checkedList]
+
+      // 选择处理
+      if (type === 1) {
+        if (limit === checkedList.length) {
+          tip()
+          return false
+        }
+        // 剩余可添加个数
+        const num = limit - checkedList.length
+        // 本次添加超出最大范围，只添加部分
+        if (changeIds.length > num) {
+          tip()
+        }
+        result = [...checkedList, ...changeIds.slice(0, num)]
+      }
+
+      // 取消选择处理
+      if (type === 2) {
+        result = checkedList.filter((c) => !changeIds.includes(c))
+      }
+
+      // 部分选择处理
+      if (type === 3) {
+        // 已达上限，则提示后，取消选择
+        if (limit === checkedList.length) {
+          tip()
+          result = checkedList.filter((c) => !changeIds.includes(c))
+        }
+        if (limit < checkedList.length) {
+          // 从已选中结点中排查出本次选中元素
+          const computedChecked = checkedList.filter(
+            (c) => !changeIds.includes(c)
+          )
+          const num = limit - (computedChecked.length + changeIds.length)
+          // 选择超过限
+          if (num < 0) {
+            tip()
+            result = [
+              ...computedChecked,
+              ...changeIds.slice(0, limit - computedChecked.length),
+            ]
+          }
+          if (num >= 0) {
+            result = [...computedChecked, ...changeIds]
+          }
+        }
+        console.log(result, '90876')
+        // 全选
+      }
       this.$emit('select', result, item)
     },
     /**

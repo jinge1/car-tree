@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    {{ partCheckedNodeList }}
     <Tree
       :list="list"
       :showList.sync="showList"
@@ -39,15 +38,35 @@ export default {
       this.updateNode(item)
     },
     updateNode(item) {
-      const { list, checkedList } = this
+      const {
+        list,
+        checkedList,
+        checkedNodeList: originCheckedNodeList,
+        partCheckedNodeList: originPartCheckedNodeList,
+      } = this
       const { parentIds } = item
-      const { partCheckedNodeList, checkedNodeList } = getNodeList(
+      const {
+        partCheckedNodeList,
+        checkedNodeList,
+        noCheckedNodeList,
+      } = getNodeList(
         parentIds.length === 0 ? item : list.find((l) => l.id === parentIds[0]),
         checkedList
       )
-      this.partCheckedNodeList = partCheckedNodeList
-      this.checkedNodeList = checkedNodeList
-      console.log(checkedNodeList, 678)
+      const changeNode = [
+        ...partCheckedNodeList,
+        ...checkedNodeList,
+        ...noCheckedNodeList,
+      ]
+
+      this.partCheckedNodeList = [
+        ...originPartCheckedNodeList.filter((p) => !changeNode.includes(p)),
+        ...partCheckedNodeList,
+      ]
+      this.checkedNodeList = [
+        ...originCheckedNodeList.filter((p) => !changeNode.includes(p)),
+        ...checkedNodeList,
+      ]
     },
   },
 }
