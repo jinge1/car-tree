@@ -36,40 +36,52 @@ function changeNodeInfo(item, keys, other = {}) {
  * @param {string} parentId 父节点id
  * @param {Array} parentIds 父节点数组信息
  */
-export function getTree(tree, cars = [], parentId = '-11', parentIds = []) {
-  return tree
-    .filter((t) => t.p === parentId)
-    .map((t) => {
-      // 节点信息转换
-      const nodeInfo = changeNodeInfo(t, treeKeys, {
-        parentIds,
-        nodeType: 'node',
-      })
-      // 节点下车辆信息(节点下既可以有车辆，也可以有子节点)
-      const nodeCars = cars
-        .filter((c) => c.r === nodeInfo.id)
-        .map((c) =>
-          changeNodeInfo(c, carKeys, {
-            parentIds: [...parentIds, nodeInfo.id],
-            nodeType: 'end',
-          })
-        )
-      // 节点孩子节点信息(节点下既可以有车辆，也可以有子节点)
-      const children =
-        t.d === null
-          ? nodeCars
-          : [
-              ...getTree(
-                tree.filter((f) => f.p !== parentId),
-                cars.filter((c) => c.r !== nodeInfo.id),
-                nodeInfo.id,
-                [...parentIds, nodeInfo.id]
-              ),
-              ...nodeCars,
-            ]
+export function getTree(tree, cars = []) {
+  let result = []
+  let parentId = '-11'
+  // 先找叶子节点
+  let arr = tree.filter((t) => t.d === null)
+  arr.forEach((a) => {
+    
+  })
+  console.log(arr)
+  // arr.forEach(a=> {
+  //   result.push(a)
+  // })
+  return []
+  // return tree
+  //   .filter((t) => t.p === parentId)
+  //   .map((t) => {
+  //     // 节点信息转换
+  //     const nodeInfo = changeNodeInfo(t, treeKeys, {
+  //       parentIds,
+  //       nodeType: 'node',
+  //     })
+  //     // 节点下车辆信息(节点下既可以有车辆，也可以有子节点)
+  //     const nodeCars = cars
+  //       .filter((c) => c.r === nodeInfo.id)
+  //       .map((c) =>
+  //         changeNodeInfo(c, carKeys, {
+  //           parentIds: [...parentIds, nodeInfo.id],
+  //           nodeType: 'end',
+  //         })
+  //       )
+  //     // 节点孩子节点信息(节点下既可以有车辆，也可以有子节点)
+  //     const children =
+  //       t.d === null
+  //         ? nodeCars
+  //         : [
+  //             ...getTree(
+  //               tree.filter((f) => f.p !== parentId),
+  //               cars.filter((c) => c.r !== nodeInfo.id),
+  //               nodeInfo.id,
+  //               [...parentIds, nodeInfo.id]
+  //             ),
+  //             ...nodeCars,
+  //           ]
 
-      return children.length > 0 ? { ...nodeInfo, children } : nodeInfo
-    })
+  //     return children.length > 0 ? { ...nodeInfo, children } : nodeInfo
+  //   })
 }
 
 /**

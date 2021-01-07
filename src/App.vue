@@ -1,23 +1,28 @@
 <template>
   <div id="app">
-    <SearchTree :list="list" :checkedList.sync="checkedList" />
+    <!-- <SearchTree :list="list" :checkedList.sync="checkedList" /> -->
+    <Chart></Chart>
   </div>
 </template>
 
 <script>
 import SearchTree from './components/SearchTree'
-import { getTree } from './utils/utils'
-import treeData from './mock/tree'
-import carsData from './mock/cars'
-
+import Chart from './components/chart'
+// import { getTree } from './utils/utils'
+// import treeData from './mock/tree'
+// import carsData from './mock/cars'
+// console.time(1)
+// const list = Object.freeze(getTree(treeData.data, carsData.data))
+// console.timeEnd(1)
 export default {
   name: 'App',
   components: {
-    SearchTree,
+    // SearchTree,
+    Chart,
   },
   data() {
     return {
-      list: Object.freeze(getTree(treeData.data, carsData.data)),
+      // list,
       checkedList: [],
     }
   },
